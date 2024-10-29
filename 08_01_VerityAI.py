@@ -15,7 +15,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 # Set up Azure Text Analytics API key and endpoint
-api_key = "8NwkoB1QllB0RD2G9qW9hE6So3KGFdBQXCPoD10JIPF39t8W4IAlJQQJ99AJAC4f1cMXJ3w3AAAaACOGafwY"  # Replace with your actual API key
 endpoint = "https://verityai.cognitiveservices.azure.com"  # Replace with your actual endpoint
 url = f"{endpoint}/text/analytics/v3.0/sentiment"
 
