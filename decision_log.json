@@ -1,0 +1,52 @@
+[
+    {
+        "action": "be_benevolent",
+        "outcome": "positive",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 1,
+            "tolerance": 1.0
+        },
+        "api_response": null
+    },
+    {
+        "action": "be_benevolent",
+        "outcome": "negative",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 0.9,
+            "tolerance": 1.0
+        },
+        "api_response": null
+    },
+    {
+        "action": "tell_truth",
+        "outcome": "positive",
+        "values": {
+            "truth": 1,
+            "benevolence": 0.9,
+            "tolerance": 1.0
+        },
+        "api_response": null
+    },
+    {
+        "action": "tell_truth",
+        "outcome": "negative",
+        "values": {
+            "truth": 0.9,
+            "benevolence": 0.9,
+            "tolerance": 1.0
+        },
+        "api_response": null
+    },
+    {
+        "action": "tell_truth",
+        "outcome": "negative",
+        "values": {
+            "truth": 0.8,
+            "benevolence": 0.9,
+            "tolerance": 1.0
+        },
+        "api_response": null
+    }
+]
