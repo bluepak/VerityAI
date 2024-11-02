@@ -678,5 +678,32 @@
         },
         "api_response": null,
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 1,
+            "benevolence": 1,
+            "tolerance": 1
+        },
+        "api_response": {
+            "documents": [],
+            "errors": [
+                {
+                    "id": "1",
+                    "error": {
+                        "code": "InvalidArgument",
+                        "message": "Invalid Document in request.",
+                        "innererror": {
+                            "code": "InvalidDocument",
+                            "message": "Document text is empty."
+                        }
+                    }
+                }
+            ],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
