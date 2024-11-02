@@ -153,5 +153,16 @@
         },
         "api_response": null,
         "context": null
+    },
+    {
+        "action": "be_benevolent",
+        "outcome": "negative",
+        "values": {
+            "truth": 1,
+            "benevolence": 0.8,
+            "tolerance": 1
+        },
+        "api_response": null,
+        "context": null
     }
 ]
