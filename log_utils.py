@@ -20,8 +20,6 @@ def log_change(description, module):
     logging.info(f"Change: {description} | Module: {module} | Time: {timestamp}")
 
 
-
-
 def log_decision(action, outcome, values, api_response=None, context=None):
     log_entry = {
         "action": action,
@@ -42,6 +40,7 @@ def log_decision(action, outcome, values, api_response=None, context=None):
 
     with open(log_file, "w") as file:
         json.dump(log_data, file, indent=4)
+
 
 
 def analyze_failures():

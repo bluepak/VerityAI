@@ -5,8 +5,14 @@ import logging
 logger = logging.getLogger()
 
 # Comment Analysis Function
-def comment_analysis(comment_text, credentials, endpoint):
+def comment_analysis(comment_text, credential, endpoint):
     """Analyze a comment using Azure Text Analytics and return the outcome."""
+    
+    # Check if the comment is valid
+    if not comment_text.strip():  # Validate that comment_text is not empty or just whitespace
+        logger.info("Skipped analysis for empty or invalid comment.")
+        return "skipped", {"error": "Invalid: Empty Comment"}
+
     try:
         # Prepare the request body
         analyze_request = {
@@ -19,8 +25,10 @@ def comment_analysis(comment_text, credentials, endpoint):
             ]
         }
 
+        # Set the correct scope for the Azure Text Analytics API
+        scope = f"{endpoint}/.default"
         headers = {
-            "Authorization": f"Bearer {credentials.get_token().token}",
+            "Authorization": f"Bearer {credential.get_token(scope).token}",
             "Content-Type": "application/json"
         }
 
@@ -39,24 +47,3 @@ def comment_analysis(comment_text, credentials, endpoint):
     except requests.exceptions.RequestException as e:
         logger.error("Request failed: %s", e)
         return "negative", None
-
-# Core Value Update Function
-def update_core_values(action, outcome, VALUES):
-    """Adjust value scores based on the feedback received."""
-    # Map actions to core values
-    action_map = {
-        "tell_truth": "truth",
-        "be_benevolent": "benevolence",
-        "be_tolerant": "tolerance"
-    }
-
-    # Get the corresponding value key
-    value_key = action_map.get(action)
-    if value_key:
-        if outcome == "positive":
-            VALUES[value_key] += 0.1
-        elif outcome == "negative":
-            VALUES[value_key] -= 0.1
-
-        # Keep values between 0 and 1
-        VALUES[value_key] = max(0, min(1, VALUES[value_key]))

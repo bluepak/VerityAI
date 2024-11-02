@@ -14,6 +14,8 @@ from ai_decision import decide_action
 from feedback import evaluate_feedback
 from log_utils import log_change, log_decision
 from self_modify import modify_action_logic, commit_and_push_changes
+from update_module import comment_analysis
+
 
 # Configure logger
 logging.basicConfig(level=logging.INFO)
