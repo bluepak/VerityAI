@@ -90,6 +90,7 @@ def self_evaluate(action_success_rates, action_weights):
     commit_and_push_changes()
 
 # Autonomous Loop with Comment Analysis
+# Autonomous Loop with Comment Analysis
 def autonomous_loop():
     """The main loop where AI makes decisions, analyzes comments, and adjusts based on outcomes."""
     while True:  # Run continuously
@@ -100,49 +101,48 @@ def autonomous_loop():
         print(f"AI decided to: {action}")
 
         if action == "analyze_comment":
-            comment_text = input("Enter the comment text to analyze: ")
+            comments_to_analyze = ["hello", "how are you?", "this is great!", "not good", "ciao..."]
+            for comment_text in comments_to_analyze:
+                print(f"Analyzing comment: {comment_text}")
 
-            analyze_request = {
-                "documents": [
-                    {
-                        "id": "1",
-                        "language": "en",
-                        "text": comment_text
-                    }
-                ]
-            }
+                analyze_request = {
+                    "documents": [
+                        {
+                            "id": "1",
+                            "language": "en",
+                            "text": comment_text
+                        }
+                    ]
+                }
 
-            headers = {
-                "Ocp-Apim-Subscription-Key": api_key,
-                "Content-Type": "application/json"
-            }
+                headers = {
+                    "Ocp-Apim-Subscription-Key": api_key,
+                    "Content-Type": "application/json"
+                }
 
-            try:
-                response = requests.post(url, headers=headers, json=analyze_request)
-                response.raise_for_status()
-                result = response.json()
-                logger.info("API Response: %s", result)
-                outcome = "positive"
-            except requests.exceptions.RequestException as e:
-                logger.error("Request failed: %s", e)
-                result = None
-                outcome = "negative"
-        else:
-            outcome = random.choice(["positive", "negative"])
-            result = None
-            print(f"Outcome of action: {outcome}")
+                try:
+                    response = requests.post(url, headers=headers, json=analyze_request)
+                    response.raise_for_status()
+                    result = response.json()
+                    logger.info("API Response: %s", result)
+                    outcome = "positive"
+                except requests.exceptions.RequestException as e:
+                    logger.error("Request failed: %s", e)
+                    result = None
+                    outcome = "negative"
 
-        memory.append((action, outcome))
-        evaluate_feedback(action, outcome, VALUES, action_success_rates)
+                print(f"Outcome of action: {outcome}")
+                memory.append((action, outcome))
+                evaluate_feedback(action, outcome, VALUES, action_success_rates)
 
-        log_decision(action, outcome, VALUES.copy(), api_response=result)
+                log_decision(action, outcome, VALUES.copy(), api_response=result)
 
-        print(f"Current Values: {VALUES}\n")
+                print(f"Current Values: {VALUES}\n")
 
-        self_evaluate(action_success_rates, action_weights)
+                self_evaluate(action_success_rates, action_weights)
 
-        with open(memory_file, "w") as file:
-            json.dump(memory, file)
+                with open(memory_file, "w") as file:
+                    json.dump(memory, file)
 
 # Run the autonomous loop
 if __name__ == "__main__":
