@@ -70,5 +70,44 @@
         },
         "api_response": null,
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 0.9,
+            "benevolence": 1.0,
+            "tolerance": 1.0
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "neutral",
+                    "confidenceScores": {
+                        "positive": 0.22,
+                        "neutral": 0.76,
+                        "negative": 0.02
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "neutral",
+                            "confidenceScores": {
+                                "positive": 0.22,
+                                "neutral": 0.76,
+                                "negative": 0.02
+                            },
+                            "offset": 0,
+                            "length": 4,
+                            "text": "hola"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
