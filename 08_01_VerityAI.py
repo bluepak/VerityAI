@@ -1,4 +1,8 @@
 import logging
+
+
+
+
 import json
 import os
 import random
@@ -23,12 +27,10 @@ from collections import Counter
 
 
 
-import logging
 
 # Simplified logging configuration
 logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug("Testing log file creation within 08_01_VerityAI.py")
-
 
 
 # Example logging
@@ -37,8 +39,9 @@ logging.error('An error occurred')  # Example error logging
 
 
 # Configure logger
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
+
+
 
 # Capture and log warnings
 def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
