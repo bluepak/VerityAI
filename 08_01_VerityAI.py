@@ -93,7 +93,21 @@ def generate_dynamic_query(keywords):
     import random
 
     # Common AI-related phrases for variation
-    additional_phrases = ["latest insights", "trending", "developments in", "future of"]
+    
+    # Focused phrases for self-improvement and comprehension
+    improvement_phrases = [ "FULLY AUTONOMOUS AI", "AI THAT improves their own code"
+        "optimize code structure",
+        "advanced error handling techniques",
+        "modular design principles",
+        "dynamic search generation in AI",
+        "self-modifying code examples",
+        "enhancing memory management",
+        "iterative improvement in AI",
+        "effective logging and debugging methods",
+        "pattern recognition in code logic",
+        "optimizing autonomous decision-making"
+    ]
+
     # Filter out any single characters or empty strings to prevent fragmentation
     cleaned_keywords = [keyword.strip() for keyword in keywords if len(keyword.strip()) > 1]
 
@@ -101,10 +115,10 @@ def generate_dynamic_query(keywords):
     base_query = " ".join(cleaned_keywords)
 
     # Add a random phrase for variety
-    query_with_phrase = f"{random.choice(additional_phrases)} {base_query}"
+    query_with_focus = f"{random.choice(improvement_phrases)} {base_query}"
 
     # Split the query into words, shuffle, and reassemble to maintain readability
-    keyword_list = query_with_phrase.split()
+    keyword_list = query_with_focus.split()
     random.shuffle(keyword_list)
     
     # Join the shuffled list into a single query string
