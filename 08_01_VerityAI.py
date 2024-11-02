@@ -3,6 +3,19 @@ import logging
 
 
 
+# Simplified logging configuration
+logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.debug("Testing log file creation within 08_01_VerityAI.py")
+
+
+# Example logging
+logging.info('Log file created for VerityAI')
+logging.error('An error occurred')  # Example error logging
+
+
+# Configure logger
+logger = logging.getLogger()
+
 import json
 import os
 import random
@@ -28,19 +41,10 @@ from collections import Counter
 
 
 
-# Simplified logging configuration
-logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.debug("Testing log file creation within 08_01_VerityAI.py")
 
-
-# Example logging
-logging.info('Log file created for VerityAI')
-logging.error('An error occurred')  # Example error logging
-
-
-# Configure logger
-logger = logging.getLogger()
-
+# Step 1: Define Keywords and Patterns to Track
+keywords = ["error", "improve", "optimize", "performance", "debug"]
+log_file = "verityai_log.log"  # Replace with the path to your log file
 
 
 # Capture and log warnings
@@ -106,6 +110,26 @@ logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format=
 
 
 
+# Step 2: Set Up the Log Scanning Function
+def scan_logs_and_generate_query(log_file):
+    queries = []  # Store generated queries
+
+    with open(log_file, 'r') as file:
+        for line in file:
+            for keyword in keywords:
+                if re.search(rf'\b{keyword}\b', line, re.IGNORECASE):  # Case-insensitive keyword matching
+                    # Step 3: Generate a Query Based on Detected Patterns
+                    context = line.strip()  # You can add more context if needed
+                    query = f"AI {keyword} code {context}"
+                    queries.append(query)
+
+    return queries
+
+# Run the function and print generated queries
+generated_queries = scan_logs_and_generate_query(log_file)
+print("Generated Queries:")
+for query in generated_queries:
+    print(query)
 
 
 def analyze_logs(log_file_path):

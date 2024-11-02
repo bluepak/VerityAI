@@ -1,0 +1,130 @@
+2024-11-02 10:45:49,844 - DEBUG - Testing log file creation within 08_01_VerityAI.py
+2024-11-02 10:45:49,844 - INFO - Log file created for VerityAI
+2024-11-02 10:45:49,844 - ERROR - An error occurred
+2024-11-02 10:45:50,793 - INFO - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'eb143a8e-9939-11ef-a146-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+No body was attached to the request
+2024-11-02 10:45:50,796 - DEBUG - Starting new HTTPS connection (1): verityaivault.vault.azure.net:443
+2024-11-02 10:45:51,207 - DEBUG - https://verityaivault.vault.azure.net:443 "GET /secrets/AZURE-CLIENT-ID/?api-version=7.5 HTTP/11" 401 97
+2024-11-02 10:45:51,212 - INFO - Response status: 401
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Length': '97'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': 'eb143a8e-9939-11ef-a146-005056c00008'
+    'x-ms-request-id': '7ae886a6-0dab-4b32-8efd-34cbb3f79fc2'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 16:45:50 GMT'
+2024-11-02 10:45:52,404 - INFO - AzureCliCredential.get_token_info succeeded
+2024-11-02 10:45:52,404 - DEBUG - [Authenticated account] Client ID: 04b07795-8ddb-461a-bbee-02f9e1bf7b46. Tenant ID: 91334908-cce5-4150-a4c3-bb766a92451a. User Principal Name: unavailableUpn. Object ID (user): f25f82be-375a-4560-b946-c85985e4290d
+2024-11-02 10:45:52,404 - INFO - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'eb143a8e-9939-11ef-a146-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2024-11-02 10:45:52,497 - DEBUG - https://verityaivault.vault.azure.net:443 "GET /secrets/AZURE-CLIENT-ID/?api-version=7.5 HTTP/11" 200 341
+2024-11-02 10:45:52,497 - INFO - Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': 'eb143a8e-9939-11ef-a146-005056c00008'
+    'x-ms-request-id': '346e0bd0-ba52-4273-865b-61bfb4358956'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 16:45:52 GMT'
+    'Content-Length': '341'
+2024-11-02 10:45:52,498 - INFO - Successfully retrieved API key from Key Vault.
+2024-11-02 10:45:52,512 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:45:52,720 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=srcname%20bebenevolent%20hello%20designer%20abstracturl%20imagewidth%20duckco%20abstracttext%20offline%20zt%20isstackexchange%20blockgroup%20decided%20srcdomain%20examplequery%20imageheight%20line%20livedate%20AUTONOMOUS%20iswikipedia%20isfanon%20name%20abstract%20ai%20testing%20about%20ismediawiki%20test%20repo%20there%20none%20devdate%20search%20producer%20AI%20heading%20image%20srcurl%20starting%20skipabstract%20answer%20redirect%20FULLY%20createddate%20status%20retrieved%20httpsduckcouserzt%20loop%20keywords%20attribution%20entity%20this%20amt%20information%20url%20productionstate%20autonomousloop%20fathead%20anothertest%20definitionurl%20signalfrom%20jscallbackname%20definition%20file%20srcoptions%20developer%20results%20minabstractlength%20another%20perlmodule%20answertype%20srcskip%20telltruth%20hi%20ps%20relatedtopics%20imageislogo%20definitionsource%20unsafe%20topic%20justanothertest%20infobox%20ddglontailanothertest%20skipqr%20source%20just%20id%20skipabstractparen%20extracted%20meta%20czverityaiverityaipy%20maintainer%20development%20czverityai%20skipicon%20how%20description%20query%20tab%20srcinfo%20srcid%20language%20abstractsource%20type%20directory%20github%20devmilestone%20skipimagename&format=json HTTP/11" 302 None
+2024-11-02 10:45:52,766 - DEBUG - https://api.duckduckgo.com:443 "GET /50x.html?e=3 HTTP/11" 301 162
+2024-11-02 10:45:52,767 - DEBUG - Starting new HTTPS connection (1): duckduckgo.com:443
+2024-11-02 10:45:52,949 - DEBUG - https://duckduckgo.com:443 "GET / HTTP/11" 200 11159
+2024-11-02 10:45:52,956 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:45:53,148 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=AUTONOMOUS%20AI%20FULLY&format=json HTTP/11" 200 None
+2024-11-02 10:45:53,152 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:45:53,338 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=ai%20hello%20pattern%20logic%20code%20recognition%20in&format=json HTTP/11" 200 None
+2024-11-02 10:48:50,346 - DEBUG - Testing log file creation within 08_01_VerityAI.py
+2024-11-02 10:48:50,346 - INFO - Log file created for VerityAI
+2024-11-02 10:48:50,346 - ERROR - An error occurred
+2024-11-02 10:48:51,261 - INFO - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '56a57199-993a-11ef-893f-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+No body was attached to the request
+2024-11-02 10:48:51,263 - DEBUG - Starting new HTTPS connection (1): verityaivault.vault.azure.net:443
+2024-11-02 10:48:51,716 - DEBUG - https://verityaivault.vault.azure.net:443 "GET /secrets/AZURE-CLIENT-ID/?api-version=7.5 HTTP/11" 401 97
+2024-11-02 10:48:51,723 - INFO - Response status: 401
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Length': '97'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': '56a57199-993a-11ef-893f-005056c00008'
+    'x-ms-request-id': 'c31f1774-3695-4247-b45a-476732f997ee'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 16:48:51 GMT'
+2024-11-02 10:48:53,027 - INFO - AzureCliCredential.get_token_info succeeded
+2024-11-02 10:48:53,027 - DEBUG - [Authenticated account] Client ID: 04b07795-8ddb-461a-bbee-02f9e1bf7b46. Tenant ID: 91334908-cce5-4150-a4c3-bb766a92451a. User Principal Name: unavailableUpn. Object ID (user): f25f82be-375a-4560-b946-c85985e4290d
+2024-11-02 10:48:53,027 - INFO - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '56a57199-993a-11ef-893f-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2024-11-02 10:48:53,121 - DEBUG - https://verityaivault.vault.azure.net:443 "GET /secrets/AZURE-CLIENT-ID/?api-version=7.5 HTTP/11" 200 341
+2024-11-02 10:48:53,122 - INFO - Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': '56a57199-993a-11ef-893f-005056c00008'
+    'x-ms-request-id': '39c82ea6-5d0f-4ed7-973b-dee38b1a76a3'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 16:48:52 GMT'
+    'Content-Length': '341'
+2024-11-02 10:48:53,124 - INFO - Successfully retrieved API key from Key Vault.
+2024-11-02 10:48:53,157 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:48:53,359 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=producer%20srcurl%20czverityaiverityaipy%20extracted%20hi%20keywords%20just%20signalfrom%20srcoptions%20heading%20designer%20there%20improvement%20attribution%20bebenevolent%20name%20examplequery%20anothertest%20justanothertest%20in%20iterative%20directory%20source%20decided%20unsafe%20query%20abstractsource%20devmilestone%20definitionurl%20createddate%20devdate%20hello%20testing%20how%20abstracturl%20none%20srcdomain%20answertype%20test%20czverityai%20another%20retrieved%20isfanon%20productionstate%20imageheight%20srcid%20amt%20infobox%20developer%20answer%20language%20skipqr%20srcname%20ddglontailanothertest%20AI%20topic%20httpsduckcouserzt%20blockgroup%20ismediawiki%20url%20skipicon%20results%20jscallbackname%20maintainer%20imagewidth%20status%20redirect%20minabstractlength%20ps%20iswikipedia%20offline%20github%20entity%20this%20loop%20srcinfo%20duckco%20meta%20description%20imageislogo%20abstracttext%20repo%20about%20search%20abstract%20autonomousloop%20id%20line%20ai%20definitionsource%20telltruth%20skipabstractparen%20file%20livedate%20information%20starting%20isstackexchange%20perlmodule%20tab%20definition%20image%20skipimagename%20development%20fathead%20srcskip%20relatedtopics%20type%20zt%20skipabstract&format=json HTTP/11" 302 None
+2024-11-02 10:48:53,409 - DEBUG - https://api.duckduckgo.com:443 "GET /50x.html?e=3 HTTP/11" 301 162
+2024-11-02 10:48:53,412 - DEBUG - Starting new HTTPS connection (1): duckduckgo.com:443
+2024-11-02 10:48:53,607 - DEBUG - https://duckduckgo.com:443 "GET / HTTP/11" 200 11159
+2024-11-02 10:48:53,613 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:48:53,798 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=AI%20in%20generation%20dynamic%20search&format=json HTTP/11" 200 None
+2024-11-02 10:48:53,802 - DEBUG - Starting new HTTPS connection (1): api.duckduckgo.com:443
+2024-11-02 10:48:53,996 - DEBUG - https://api.duckduckgo.com:443 "GET /?q=own%20AI%20structure%20ai%20THAT%20hello%20their%20improves%20codeoptimize%20code&format=json HTTP/11" 200 None
