@@ -84,9 +84,54 @@ else:
     memory = []
 
 
-
 # Initialize logging
 logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+
+
+
+
+def analyze_logs(log_file_path):
+    """
+    Analyze VerityAI's logs to detect recurring patterns, errors, or issues.
+    
+    Parameters:
+        log_file_path (str): Path to the log file.
+
+    Returns:
+        dict: A dictionary of flagged issues with their counts.
+    """
+    # Keywords to track for pattern recognition
+    error_keywords = [
+        "memory error", "connection timeout", "failed to load", 
+        "authentication failed", "syntax error", "index out of range",
+        "null pointer", "memory leak", "disk full", "timeout"
+    ]
+    
+    # Load log file
+    with open(log_file_path, 'r') as file:
+        log_content = file.read().lower()
+
+    # Count occurrences of each keyword
+    pattern_counter = Counter()
+    for keyword in error_keywords:
+        occurrences = len(re.findall(rf'\b{keyword}\b', log_content))
+        if occurrences > 0:
+            pattern_counter[keyword] += occurrences
+
+    # Filter patterns by a threshold (e.g., occurrences > 3)
+    flagged_issues = {pattern: count for pattern, count in pattern_counter.items() if count >= 3}
+    
+    # Output flagged issues for query generation
+    if flagged_issues:
+        print("Flagged Issues:", flagged_issues)
+    else:
+        print("No significant recurring issues detected.")
+
+    return flagged_issues
+
+
+
 
 def generate_dynamic_query(keywords):
     """Generate a dynamic and unique search query each time."""
