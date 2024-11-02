@@ -3948,3 +3948,1929 @@ Response headers:
     'Content-Length': '341'
 2024-11-02 06:51:37,004 - Successfully retrieved API key from Key Vault.
 2024-11-02 06:51:37,647 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'offset': 0, 'length': 5, 'text': 'hello'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+2024-11-02 06:51:40,194 - Committed changes:
+diff --git a/08_01_VerityAI.py b/08_01_VerityAI.py
+index 9ca9fdb..1006731 100644
+--- a/08_01_VerityAI.py
++++ b/08_01_VerityAI.py
+@@ -21,7 +21,11 @@ from update_module import comment_analysis
+ logging.basicConfig(level=logging.INFO)
+ logger = logging.getLogger()
+ 
++# Capture and log warnings
++def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
++    logger.warning(f"Warning: {message} (category: {category.__name__}, filename: {filename}, line: {lineno})")
+ 
++warnings.showwarning = warn_on_warnings
+ 
+ 
+ # Core Values
+@@ -74,14 +78,6 @@ else:
+     memory = []
+ 
+ 
+-# Sample comments for random selection
+-sample_comments = [
+-    "This is amazing!", "Could be better...", "Not impressed.", "I'm happy with this.",
+-    "Terrible experience!", "Wow, just wow!", "Really helpful!", "Disappointing.",
+-    "Top-notch quality!", "Needs improvement.", "Very satisfying!", "Would not recommend.",
+-    "Superb service!", "I'm not sure about this.", "Absolutely fantastic!", "Could be worse."
+-]
+-
+ 
+ # Initialize logging
+ logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+@@ -91,6 +87,11 @@ def log_change(description, module):
+     logging.info(f"Change: {description} | Module: {module} | Time: {timestamp}")
+ 
+ 
++def search_information(query):
++    """Search for information on the web using DuckDuckGo."""
++    url = f"https://api.duckduckgo.com/?q={query}&format=json"
++    response = requests.get(url)
++    return response.json()
+ def commit_and_push_changes():
+     # Get the list of changes to be committed
+     result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
+@@ -164,24 +165,13 @@ def autonomous_loop():
+         info = search_information("latest trends in AI")
+         print("Retrieved Information:", info)
+ 
+-
+-        # Make a decision based on weights
+         action = decide_action(action_weights)
+         print(f"AI decided to: {action}")
+ 
+-
+-        # If the action is to analyze comments, pick random comments
+         if action == "analyze_comment":
+-            comments_to_analyze = random.sample(sample_comments, k=5)  # Choose 5 random comments
++            comments_to_analyze = ["hello", "how are you?", "this is great!", "not good", "ciao..."]
+             for comment_text in comments_to_analyze:
+-                outcome, result = comment_analysis(comment_text, credentials, endpoint)
+-                log_decision("analyze_comment", outcome, VALUES.copy(), api_response=result, context=comment_text)
+-
+-
+-                # Process outcome feedback
+-                evaluate_feedback(action, outcome, VALUES, action_success_rates)
+-                print(f"Outcome of action: {outcome}")
+-                print(f"Current Values: {VALUES}\n")
++                print(f"Analyzing comment: {comment_text}")
+ 
+                 analyze_request = {
+                     "documents": [
+@@ -225,13 +215,6 @@ def autonomous_loop():
+         loop_counter += 1  # Increment the loop counter
+         time.sleep(17)  # Optional: Pause for 60 seconds before the next iteration
+ 
+-
+-def search_information(query):
+-    """Search for information on the web using DuckDuckGo."""
+-    url = f"https://api.duckduckgo.com/?q={query}&format=json"
+-    response = requests.get(url)
+-    return response.json()
+-
+ # Run the autonomous loop
+ if __name__ == "__main__":
+     autonomous_loop()
+diff --git a/__pycache__/log_utils.cpython-312.pyc b/__pycache__/log_utils.cpython-312.pyc
+index c721b88..221900f 100644
+Binary files a/__pycache__/log_utils.cpython-312.pyc and b/__pycache__/log_utils.cpython-312.pyc differ
+diff --git a/__pycache__/update_module.cpython-312.pyc b/__pycache__/update_module.cpython-312.pyc
+index 7d40120..4ab4beb 100644
+Binary files a/__pycache__/update_module.cpython-312.pyc and b/__pycache__/update_module.cpython-312.pyc differ
+diff --git a/decision_log.json b/decision_log.json
+index 6d7a47d..96c5a1c 100644
+--- a/decision_log.json
++++ b/decision_log.json
+@@ -5768,5 +5768,44 @@
+             "modelVersion": "2024-03-01"
+         },
+         "context": null
++    },
++    {
++        "action": "analyze_comment",
++        "outcome": "positive",
++        "values": {
++            "truth": 1.0,
++            "benevolence": 1.0,
++            "tolerance": 1.0
++        },
++        "api_response": {
++            "documents": [
++                {
++                    "id": "1",
++                    "sentiment": "neutral",
++                    "confidenceScores": {
++                        "positive": 0.11,
++                        "neutral": 0.89,
++                        "negative": 0.0
++                    },
++                    "sentences": [
++                        {
++                            "sentiment": "neutral",
++                            "confidenceScores": {
++                                "positive": 0.11,
++                                "neutral": 0.89,
++                                "negative": 0.0
++                            },
++                            "offset": 0,
++                            "length": 5,
++                            "text": "hello"
++                        }
++                    ],
++                    "warnings": []
++                }
++            ],
++            "errors": [],
++            "modelVersion": "2024-03-01"
++        },
++        "context": null
+     }
+ ]
+\ No newline at end of file
+diff --git a/update_module.py b/update_module.py
+index 307c47d..408e780 100644
+--- a/update_module.py
++++ b/update_module.py
+@@ -5,7 +5,7 @@ import logging
+ logger = logging.getLogger()
+ 
+ # Comment Analysis Function
+-def comment_analysis(comment_text, credentials, endpoint):
++def comment_analysis(comment_text, credential, endpoint):
+     """Analyze a comment using Azure Text Analytics and return the outcome."""
+     
+     # Check if the comment is valid
+@@ -25,8 +25,10 @@ def comment_analysis(comment_text, credentials, endpoint):
+             ]
+         }
+ 
++        # Set the correct scope for the Azure Text Analytics API
++        scope = f"{endpoint}/.default"
+         headers = {
+-            "Authorization": f"Bearer {credentials.get_token().token}",
++            "Authorization": f"Bearer {credential.get_token(scope).token}",
+             "Content-Type": "application/json"
+         }
+ 
+@@ -45,4 +47,3 @@ def comment_analysis(comment_text, credentials, endpoint):
+     except requests.exceptions.RequestException as e:
+         logger.error("Request failed: %s", e)
+         return "negative", None
+-
+diff --git a/verityai_changes.log b/verityai_changes.log
+index dff1fbd..d3d5343 100644
+--- a/verityai_changes.log
++++ b/verityai_changes.log
+@@ -2505,3 +2505,1446 @@ index a0c72a3..3623931 100644
+ +2024-11-02 05:31:00,216 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.03, 'neutral': 0.96, 'negative': 0.0}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.03, 'neutral': 0.96, 'negative': 0.0}, 'offset': 0, 'length': 7, 'text': 'ciao...'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+ 
+ 2024-11-02 05:31:02,603 - Reason for changes: Automated code modification
++2024-11-02 05:51:57,304 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'dcb350af-9910-11ef-acd6-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 05:51:57,842 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'dcb350af-9910-11ef-acd6-005056c00008'
++    'x-ms-request-id': '9d790c65-9905-47d6-87cb-770a7b8250d6'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:51:57 GMT'
++2024-11-02 05:52:01,184 - AzureCliCredential.get_token_info succeeded
++2024-11-02 05:52:01,184 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'dcb350af-9910-11ef-acd6-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 05:52:01,275 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'dcb350af-9910-11ef-acd6-005056c00008'
++    'x-ms-request-id': '46194ef7-073a-40bf-bdff-540addf0c571'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:52:00 GMT'
++    'Content-Length': '341'
++2024-11-02 05:52:01,275 - Successfully retrieved API key from Key Vault.
++2024-11-02 05:55:41,237 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '622cdfa5-9911-11ef-ae24-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 05:55:41,655 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '622cdfa5-9911-11ef-ae24-005056c00008'
++    'x-ms-request-id': 'c02000c3-e857-488f-9408-d76a1e40858c'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:55:41 GMT'
++2024-11-02 05:55:43,083 - AzureCliCredential.get_token_info succeeded
++2024-11-02 05:55:43,084 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '622cdfa5-9911-11ef-ae24-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 05:55:43,180 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '622cdfa5-9911-11ef-ae24-005056c00008'
++    'x-ms-request-id': 'd2ca7ac8-dd8b-46b4-8de9-5601d16b470c'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:55:42 GMT'
++    'Content-Length': '341'
++2024-11-02 05:55:43,181 - Successfully retrieved API key from Key Vault.
++2024-11-02 05:56:00,621 - AzureCliCredential.get_token failed: This credential requires exactly one scope per token request.
++2024-11-02 05:58:57,756 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd74f507a-9911-11ef-ad57-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 05:58:58,210 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'd74f507a-9911-11ef-ad57-005056c00008'
++    'x-ms-request-id': '261064c4-bef6-450b-90a2-9fa2f9f505db'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:58:57 GMT'
++2024-11-02 05:58:59,585 - AzureCliCredential.get_token_info succeeded
++2024-11-02 05:58:59,586 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd74f507a-9911-11ef-ad57-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 05:58:59,933 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'd74f507a-9911-11ef-ad57-005056c00008'
++    'x-ms-request-id': 'a2e4db72-66f0-4e59-b279-e8b96925b3b4'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 11:58:59 GMT'
++    'Content-Length': '341'
++2024-11-02 05:58:59,934 - Successfully retrieved API key from Key Vault.
++2024-11-02 05:59:02,714 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:02:04,508 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '469f4b13-9912-11ef-8ef8-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:02:04,959 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '469f4b13-9912-11ef-8ef8-005056c00008'
++    'x-ms-request-id': 'a06b746d-f470-45dd-b48e-b6acee0b4dc5'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:02:04 GMT'
++2024-11-02 06:02:06,317 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:02:06,317 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '469f4b13-9912-11ef-8ef8-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:02:06,410 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '469f4b13-9912-11ef-8ef8-005056c00008'
++    'x-ms-request-id': '0d31c7ea-386b-4b52-ac3e-3c5622421f73'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:02:05 GMT'
++    'Content-Length': '341'
++2024-11-02 06:02:06,410 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:05:21,513 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'bc0beac2-9912-11ef-81dd-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:05:21,949 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'bc0beac2-9912-11ef-81dd-005056c00008'
++    'x-ms-request-id': '54bc9f41-c88a-45ca-b4f9-9ef7f044db00'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:05:20 GMT'
++2024-11-02 06:05:23,238 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:05:23,238 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'bc0beac2-9912-11ef-81dd-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:05:23,331 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'bc0beac2-9912-11ef-81dd-005056c00008'
++    'x-ms-request-id': '3900681a-fa13-4945-8fa8-e7f7bc2257e3'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:05:22 GMT'
++    'Content-Length': '341'
++2024-11-02 06:05:23,332 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:05:43,683 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:08:02,241 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '1bd8f280-9913-11ef-aebc-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:08:02,746 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '1bd8f280-9913-11ef-aebc-005056c00008'
++    'x-ms-request-id': 'ae247d47-8ee8-4c74-a90e-8d2107c23734'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:08:01 GMT'
++2024-11-02 06:08:03,940 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:08:03,940 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '1bd8f280-9913-11ef-aebc-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:08:04,035 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '1bd8f280-9913-11ef-aebc-005056c00008'
++    'x-ms-request-id': 'f945ca66-16e6-4713-948d-d4f6bbd3df40'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:08:03 GMT'
++    'Content-Length': '341'
++2024-11-02 06:08:04,036 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:09:15,775 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:13:12,253 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd4a11e56-9913-11ef-813e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:13:12,260 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd4a11e56-9913-11ef-813e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:13:13,862 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd4a11e56-9913-11ef-813e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:13:17,067 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'd4a11e56-9913-11ef-813e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:13:17,069 - Failed to retrieve API key: <urllib3.connection.HTTPSConnection object at 0x00000122E569BBF0>: Failed to resolve '%7bkey-vault-name%7d.vault.azure.net' ([Errno 11001] getaddrinfo failed)
++2024-11-02 06:14:05,514 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'f46039a6-9913-11ef-886e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:14:05,520 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'f46039a6-9913-11ef-886e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:14:07,121 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'f46039a6-9913-11ef-886e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:14:10,324 - Request URL: 'https://%7Bkey-vault-name%7D.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'f46039a6-9913-11ef-886e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:14:10,325 - Failed to retrieve API key: <urllib3.connection.HTTPSConnection object at 0x000002993394BBF0>: Failed to resolve '%7bkey-vault-name%7d.vault.azure.net' ([Errno 11001] getaddrinfo failed)
++2024-11-02 06:15:56,241 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '365fb848-9914-11ef-adce-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:15:56,713 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '365fb848-9914-11ef-adce-005056c00008'
++    'x-ms-request-id': '88a9fb17-a3a7-47da-87bb-139bd780b01b'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:15:55 GMT'
++2024-11-02 06:15:56,715 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/v2.0/.well-known/openid-configuration'
++Request method: 'GET'
++Request headers:
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:15:56,944 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': '2e5401fe-bfcc-47c4-9235-105d50c89900'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:15:56 GMT'
++    'Content-Length': '1753'
++2024-11-02 06:15:56,955 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/oauth2/v2.0/token'
++Request method: 'POST'
++Request headers:
++    'Accept': 'application/json'
++    'x-client-sku': 'REDACTED'
++    'x-client-ver': 'REDACTED'
++    'x-client-os': 'REDACTED'
++    'x-ms-lib-capability': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-client-current-telemetry': 'REDACTED'
++    'x-client-last-telemetry': 'REDACTED'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++A body is sent with the request
++2024-11-02 06:15:57,069 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-store, no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'P3P': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-ms-request-id': '2d1afc1b-08c9-43e7-9987-ddc37dfc8900'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-clitelem': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:15:56 GMT'
++    'Content-Length': '623'
++2024-11-02 06:15:57,070 - Request URL: 'https://login.microsoftonline.com/common/discovery/instance?api-version=REDACTED&authorization_endpoint=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:15:57,138 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': 'c1b6053a-7300-4743-b203-5e7c417ba300'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:15:56 GMT'
++    'Content-Length': '945'
++2024-11-02 06:15:57,138 - ClientSecretCredential.get_token_info failed: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 2d1afc1b-08c9-43e7-9987-ddc37dfc8900 Correlation ID: 9e6fbf95-01c5-4eb9-9a83-cf4652f7577c Timestamp: 2024-11-02 12:15:56Z
++2024-11-02 06:15:57,138 - Failed to retrieve API key: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 2d1afc1b-08c9-43e7-9987-ddc37dfc8900 Correlation ID: 9e6fbf95-01c5-4eb9-9a83-cf4652f7577c Timestamp: 2024-11-02 12:15:56Z
++2024-11-02 06:21:14,260 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'f3ed998c-9914-11ef-8b6e-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:21:14,711 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'f3ed998c-9914-11ef-8b6e-005056c00008'
++    'x-ms-request-id': 'a938ca81-affb-470c-b34f-ac1d2c27c180'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:21:13 GMT'
++2024-11-02 06:21:14,713 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/v2.0/.well-known/openid-configuration'
++Request method: 'GET'
++Request headers:
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:21:14,968 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': 'a476033d-d79a-4647-a0fd-2b9c0b2e8b00'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:21:14 GMT'
++    'Content-Length': '1753'
++2024-11-02 06:21:14,969 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/oauth2/v2.0/token'
++Request method: 'POST'
++Request headers:
++    'Accept': 'application/json'
++    'x-client-sku': 'REDACTED'
++    'x-client-ver': 'REDACTED'
++    'x-client-os': 'REDACTED'
++    'x-ms-lib-capability': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-client-current-telemetry': 'REDACTED'
++    'x-client-last-telemetry': 'REDACTED'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++A body is sent with the request
++2024-11-02 06:21:15,108 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-store, no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'P3P': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-ms-request-id': '7a959df9-6024-45cf-8be9-dbe1498a3400'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-clitelem': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'Content-Security-Policy-Report-Only': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:21:14 GMT'
++    'Content-Length': '623'
++2024-11-02 06:21:15,108 - Request URL: 'https://login.microsoftonline.com/common/discovery/instance?api-version=REDACTED&authorization_endpoint=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:21:15,173 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': 'dcc45588-b6d7-415e-897e-eea45c720a00'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:21:14 GMT'
++    'Content-Length': '945'
++2024-11-02 06:21:15,173 - ClientSecretCredential.get_token_info failed: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 7a959df9-6024-45cf-8be9-dbe1498a3400 Correlation ID: 5c9f6063-ff6d-464a-8ed5-f58f5ea8db5b Timestamp: 2024-11-02 12:21:14Z
++2024-11-02 06:21:15,173 - Failed to retrieve API key: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 7a959df9-6024-45cf-8be9-dbe1498a3400 Correlation ID: 5c9f6063-ff6d-464a-8ed5-f58f5ea8db5b Timestamp: 2024-11-02 12:21:14Z
++2024-11-02 06:28:16,645 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'efb07c30-9915-11ef-9725-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:28:17,133 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'efb07c30-9915-11ef-9725-005056c00008'
++    'x-ms-request-id': '108c0218-9e81-405a-bf62-f5983f1d090c'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:28:15 GMT'
++2024-11-02 06:28:17,134 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/v2.0/.well-known/openid-configuration'
++Request method: 'GET'
++Request headers:
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:28:17,495 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': '0c341f6d-06cf-49d5-8e37-365eb6ad8200'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'Content-Security-Policy-Report-Only': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:28:16 GMT'
++    'Content-Length': '1753'
++2024-11-02 06:28:17,496 - Request URL: 'https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a/oauth2/v2.0/token'
++Request method: 'POST'
++Request headers:
++    'Accept': 'application/json'
++    'x-client-sku': 'REDACTED'
++    'x-client-ver': 'REDACTED'
++    'x-client-os': 'REDACTED'
++    'x-ms-lib-capability': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-client-current-telemetry': 'REDACTED'
++    'x-client-last-telemetry': 'REDACTED'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++A body is sent with the request
++2024-11-02 06:28:17,609 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-store, no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'P3P': 'REDACTED'
++    'client-request-id': 'REDACTED'
++    'x-ms-request-id': '6af43e66-b444-4f56-b4ed-151f35f29000'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-clitelem': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:28:16 GMT'
++    'Content-Length': '623'
++2024-11-02 06:28:17,610 - Request URL: 'https://login.microsoftonline.com/common/discovery/instance?api-version=REDACTED&authorization_endpoint=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'User-Agent': 'azsdk-python-identity/1.19.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:28:17,697 - Response status: 200
++Response headers:
++    'Cache-Control': 'max-age=86400, private'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Strict-Transport-Security': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Access-Control-Allow-Origin': 'REDACTED'
++    'Access-Control-Allow-Methods': 'REDACTED'
++    'P3P': 'REDACTED'
++    'x-ms-request-id': '4c02e1ee-dcf1-4e97-ac05-f7a6857a0a00'
++    'x-ms-ests-server': 'REDACTED'
++    'x-ms-srs': 'REDACTED'
++    'X-XSS-Protection': 'REDACTED'
++    'Set-Cookie': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:28:17 GMT'
++    'Content-Length': '945'
++2024-11-02 06:28:17,697 - ClientSecretCredential.get_token_info failed: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 6af43e66-b444-4f56-b4ed-151f35f29000 Correlation ID: ae8ab197-3adc-45e5-b3e5-246af87ddb25 Timestamp: 2024-11-02 12:28:17Z
++2024-11-02 06:28:17,698 - Failed to retrieve API key: Authentication failed: AADSTS7000215: Invalid client secret provided. Ensure the secret being sent in the request is the client secret value, not the client secret ID, for a secret added to app '893a84c9-ef27-4cb5-96c0-1c16ba957a16'. Trace ID: 6af43e66-b444-4f56-b4ed-151f35f29000 Correlation ID: ae8ab197-3adc-45e5-b3e5-246af87ddb25 Timestamp: 2024-11-02 12:28:17Z
++2024-11-02 06:29:49,792 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '27355647-9916-11ef-8717-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:29:50,297 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '27355647-9916-11ef-8717-005056c00008'
++    'x-ms-request-id': '468eca53-00a0-4f29-bab4-1a85ea6dd1cd'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:29:49 GMT'
++2024-11-02 06:29:51,668 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:29:51,669 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '27355647-9916-11ef-8717-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:29:51,814 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '27355647-9916-11ef-8717-005056c00008'
++    'x-ms-request-id': 'd3bfa62c-d7e6-4f13-b4d4-4c24d9118a4d'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:29:51 GMT'
++    'Content-Length': '341'
++2024-11-02 06:29:51,815 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:30:50,248 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '4b3e567b-9916-11ef-8f7b-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:30:50,679 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '4b3e567b-9916-11ef-8f7b-005056c00008'
++    'x-ms-request-id': '3cd94680-f3ae-4230-b327-933a87cb877e'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:30:49 GMT'
++2024-11-02 06:30:51,839 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:30:51,839 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '4b3e567b-9916-11ef-8f7b-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:30:51,935 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '4b3e567b-9916-11ef-8f7b-005056c00008'
++    'x-ms-request-id': 'fde4d8ff-9536-4a4d-b835-f9629d73b172'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:30:50 GMT'
++    'Content-Length': '341'
++2024-11-02 06:30:51,936 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:31:00,840 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '518e6f5d-9916-11ef-9fe3-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:31:01,272 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '518e6f5d-9916-11ef-9fe3-005056c00008'
++    'x-ms-request-id': '04fd43fa-ceed-407b-b99f-634c847cf1a8'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:00 GMT'
++2024-11-02 06:31:02,443 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:31:02,443 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '518e6f5d-9916-11ef-9fe3-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:31:02,697 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '518e6f5d-9916-11ef-9fe3-005056c00008'
++    'x-ms-request-id': '4d4ca133-9160-4789-acfa-9a583a350b8a'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:01 GMT'
++    'Content-Length': '341'
++2024-11-02 06:31:02,698 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:31:45,347 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6c15d0ef-9916-11ef-9912-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:31:45,747 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6c15d0ef-9916-11ef-9912-005056c00008'
++    'x-ms-request-id': 'e61fb3df-d528-4d69-af57-5cb65b96df03'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:44 GMT'
++2024-11-02 06:31:47,011 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:31:47,012 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6c15d0ef-9916-11ef-9912-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:31:47,106 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6c15d0ef-9916-11ef-9912-005056c00008'
++    'x-ms-request-id': '0533e4e7-11e9-4eee-9ea3-da9ae34ad61f'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:46 GMT'
++    'Content-Length': '341'
++2024-11-02 06:31:47,107 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:31:58,104 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '73b051c9-9916-11ef-aa36-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:31:58,598 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '73b051c9-9916-11ef-aa36-005056c00008'
++    'x-ms-request-id': '0c4286bb-8a56-46de-8907-8be238d46381'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:57 GMT'
++2024-11-02 06:31:59,765 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:31:59,765 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '73b051c9-9916-11ef-aa36-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:31:59,989 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '73b051c9-9916-11ef-aa36-005056c00008'
++    'x-ms-request-id': '17af8f0d-48bc-4b39-b521-c20dc1e8af5f'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:31:58 GMT'
++    'Content-Length': '341'
++2024-11-02 06:31:59,990 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:33:28,648 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:34:16,321 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'c6126ce2-9916-11ef-81e5-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:34:16,772 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'c6126ce2-9916-11ef-81e5-005056c00008'
++    'x-ms-request-id': 'a72b7ecc-5caa-43dd-870c-28b62d5917b5'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:34:15 GMT'
++2024-11-02 06:34:17,927 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:34:17,927 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'c6126ce2-9916-11ef-81e5-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:34:18,019 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'c6126ce2-9916-11ef-81e5-005056c00008'
++    'x-ms-request-id': '74434067-be51-42d4-af47-eb5ab6d60d32'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:34:16 GMT'
++    'Content-Length': '341'
++2024-11-02 06:34:18,019 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:35:16,858 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'ea27d543-9916-11ef-8625-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:35:17,301 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'ea27d543-9916-11ef-8625-005056c00008'
++    'x-ms-request-id': 'e82c0f9c-237c-4091-a1c5-b27ded2c7dd1'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:35:16 GMT'
++2024-11-02 06:35:18,509 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:35:18,510 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'ea27d543-9916-11ef-8625-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:35:18,598 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'ea27d543-9916-11ef-8625-005056c00008'
++    'x-ms-request-id': 'bd4687fb-bfa6-457e-aec1-53696965b544'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:35:17 GMT'
++    'Content-Length': '341'
++2024-11-02 06:35:18,598 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:36:30,458 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:37:18,656 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '32c0d21a-9917-11ef-a735-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:37:19,088 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '32c0d21a-9917-11ef-a735-005056c00008'
++    'x-ms-request-id': 'f3a53022-f640-4b18-862c-8be093ffac29'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:37:17 GMT'
++2024-11-02 06:37:20,324 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:37:20,324 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '32c0d21a-9917-11ef-a735-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:37:20,418 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '32c0d21a-9917-11ef-a735-005056c00008'
++    'x-ms-request-id': 'a2306483-565d-42e8-9fcd-d676a2059d37'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:37:19 GMT'
++    'Content-Length': '341'
++2024-11-02 06:37:20,419 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:37:43,095 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '41519d80-9917-11ef-a0c5-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:37:43,547 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '41519d80-9917-11ef-a0c5-005056c00008'
++    'x-ms-request-id': '297fce56-840e-4f1e-b27d-c35129272b46'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:37:42 GMT'
++2024-11-02 06:37:44,976 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:37:44,977 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '41519d80-9917-11ef-a0c5-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:37:45,086 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '41519d80-9917-11ef-a0c5-005056c00008'
++    'x-ms-request-id': '6ecd119d-8f67-4ca1-b830-6f434fc09e2a'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:37:43 GMT'
++    'Content-Length': '341'
++2024-11-02 06:37:45,087 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:38:00,992 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '4bfc844c-9917-11ef-ab23-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:38:01,487 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '4bfc844c-9917-11ef-ab23-005056c00008'
++    'x-ms-request-id': '8fb9b403-0dad-476e-8421-2ca430099afd'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:00 GMT'
++2024-11-02 06:38:02,733 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:38:02,734 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '4bfc844c-9917-11ef-ab23-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:38:02,827 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '4bfc844c-9917-11ef-ab23-005056c00008'
++    'x-ms-request-id': 'ab88a1e0-d8f5-4123-bb7c-6e95046beb4b'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:02 GMT'
++    'Content-Length': '341'
++2024-11-02 06:38:02,828 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:38:15,405 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '5493f8ae-9917-11ef-b270-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:38:15,819 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '5493f8ae-9917-11ef-b270-005056c00008'
++    'x-ms-request-id': '23492228-36c9-49ee-9a7c-e9faec3877bb'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:15 GMT'
++2024-11-02 06:38:17,162 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:38:17,163 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '5493f8ae-9917-11ef-b270-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:38:17,252 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '5493f8ae-9917-11ef-b270-005056c00008'
++    'x-ms-request-id': 'd57f9bac-8230-4628-8889-af10ccd59a36'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:16 GMT'
++    'Content-Length': '341'
++2024-11-02 06:38:17,253 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:38:41,926 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6462b5ef-9917-11ef-8f71-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:38:42,379 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6462b5ef-9917-11ef-8f71-005056c00008'
++    'x-ms-request-id': '61715fa0-1ccb-458a-85c1-0404ca15c0ce'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:41 GMT'
++2024-11-02 06:38:43,896 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:38:43,896 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6462b5ef-9917-11ef-8f71-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:38:43,986 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6462b5ef-9917-11ef-8f71-005056c00008'
++    'x-ms-request-id': '670282f6-cccc-4b7a-993d-a572cc1ed2a5'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:38:43 GMT'
++    'Content-Length': '341'
++2024-11-02 06:38:43,986 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:39:00,735 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6f98c3ec-9917-11ef-9c0d-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:39:01,190 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6f98c3ec-9917-11ef-9c0d-005056c00008'
++    'x-ms-request-id': '927d2e4d-84af-4485-baa1-70304a54d1c3'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:39:00 GMT'
++2024-11-02 06:39:02,445 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:39:02,445 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '6f98c3ec-9917-11ef-9c0d-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:39:02,533 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '6f98c3ec-9917-11ef-9c0d-005056c00008'
++    'x-ms-request-id': 'a3a3c8fd-c3a4-4ecb-a244-fb4a5c70e25e'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:39:01 GMT'
++    'Content-Length': '341'
++2024-11-02 06:39:02,534 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:41:29,902 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'c881d661-9917-11ef-a6df-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:41:30,337 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'c881d661-9917-11ef-a6df-005056c00008'
++    'x-ms-request-id': 'd28de32c-dcf8-4d3d-ac15-476fd1988f13'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:41:29 GMT'
++2024-11-02 06:41:31,573 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:41:31,574 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'c881d661-9917-11ef-a6df-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:41:31,664 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'c881d661-9917-11ef-a6df-005056c00008'
++    'x-ms-request-id': 'a446e4f8-d2ce-4f08-81ad-60586430544b'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:41:30 GMT'
++    'Content-Length': '341'
++2024-11-02 06:41:31,664 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:49:37,259 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'eafe74a5-9918-11ef-8158-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:49:37,821 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'eafe74a5-9918-11ef-8158-005056c00008'
++    'x-ms-request-id': '9f927358-40a1-46ce-86a1-6fc6f3521ed9'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:49:37 GMT'
++2024-11-02 06:49:39,179 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:49:39,180 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': 'eafe74a5-9918-11ef-8158-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:49:39,501 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': 'eafe74a5-9918-11ef-8158-005056c00008'
++    'x-ms-request-id': '8bc65e9d-624d-4c62-a420-e6636f097c2a'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:49:38 GMT'
++    'Content-Length': '341'
++2024-11-02 06:49:39,502 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:50:16,905 - AzureCliCredential.get_token failed: Please run 'az login' to set up an account
++2024-11-02 06:51:35,252 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '3152e13b-9919-11ef-a8ef-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++No body was attached to the request
++2024-11-02 06:51:35,706 - Response status: 401
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Length': '97'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '3152e13b-9919-11ef-a8ef-005056c00008'
++    'x-ms-request-id': 'f4b140d5-5108-4efe-ab10-21d02805dcdc'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:51:35 GMT'
++2024-11-02 06:51:36,910 - AzureCliCredential.get_token_info succeeded
++2024-11-02 06:51:36,911 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
++Request method: 'GET'
++Request headers:
++    'Accept': 'application/json'
++    'x-ms-client-request-id': '3152e13b-9919-11ef-a8ef-005056c00008'
++    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
++    'Authorization': 'REDACTED'
++No body was attached to the request
++2024-11-02 06:51:37,004 - Response status: 200
++Response headers:
++    'Cache-Control': 'no-cache'
++    'Pragma': 'no-cache'
++    'Content-Type': 'application/json; charset=utf-8'
++    'Expires': '-1'
++    'x-ms-keyvault-region': 'westus'
++    'x-ms-client-request-id': '3152e13b-9919-11ef-a8ef-005056c00008'
++    'x-ms-request-id': 'af058961-ee55-4e23-8e1e-78cc155ba2db'
++    'x-ms-keyvault-service-version': '1.9.1864.1'
++    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
++    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
++    'X-Content-Type-Options': 'REDACTED'
++    'Strict-Transport-Security': 'REDACTED'
++    'Date': 'Sat, 02 Nov 2024 12:51:36 GMT'
++    'Content-Length': '341'
++2024-11-02 06:51:37,004 - Successfully retrieved API key from Key Vault.
++2024-11-02 06:51:37,647 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'offset': 0, 'length': 5, 'text': 'hello'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+
+2024-11-02 06:51:40,195 - Reason for changes: Automated code modification
+2024-11-02 06:51:40,611 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.04, 'neutral': 0.95, 'negative': 0.01}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.04, 'neutral': 0.95, 'negative': 0.01}, 'offset': 0, 'length': 12, 'text': 'how are you?'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+2024-11-02 06:51:43,030 - Committed changes:
+diff --git a/decision_log.json b/decision_log.json
+index 96c5a1c..5eeec63 100644
+--- a/decision_log.json
++++ b/decision_log.json
+@@ -5807,5 +5807,44 @@
+             "modelVersion": "2024-03-01"
+         },
+         "context": null
++    },
++    {
++        "action": "analyze_comment",
++        "outcome": "positive",
++        "values": {
++            "truth": 1.0,
++            "benevolence": 1.0,
++            "tolerance": 1.0
++        },
++        "api_response": {
++            "documents": [
++                {
++                    "id": "1",
++                    "sentiment": "neutral",
++                    "confidenceScores": {
++                        "positive": 0.04,
++                        "neutral": 0.95,
++                        "negative": 0.01
++                    },
++                    "sentences": [
++                        {
++                            "sentiment": "neutral",
++                            "confidenceScores": {
++                                "positive": 0.04,
++                                "neutral": 0.95,
++                                "negative": 0.01
++                            },
++                            "offset": 0,
++                            "length": 12,
++                            "text": "how are you?"
++                        }
++                    ],
++                    "warnings": []
++                }
++            ],
++            "errors": [],
++            "modelVersion": "2024-03-01"
++        },
++        "context": null
+     }
+ ]
+\ No newline at end of file
+diff --git a/memory.json b/memory.json
+index 0b86824..01d0897 100644
+--- a/memory.json
++++ b/memory.json
+@@ -1 +1 @@
+-[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
++[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
+
+2024-11-02 06:51:43,030 - Reason for changes: Automated code modification
+2024-11-02 06:51:43,357 - API Response: {'documents': [{'id': '1', 'sentiment': 'positive', 'confidenceScores': {'positive': 1.0, 'neutral': 0.0, 'negative': 0.0}, 'sentences': [{'sentiment': 'positive', 'confidenceScores': {'positive': 1.0, 'neutral': 0.0, 'negative': 0.0}, 'offset': 0, 'length': 14, 'text': 'this is great!'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+2024-11-02 06:51:45,797 - Committed changes:
+diff --git a/decision_log.json b/decision_log.json
+index 5eeec63..4c0b594 100644
+--- a/decision_log.json
++++ b/decision_log.json
+@@ -5846,5 +5846,44 @@
+             "modelVersion": "2024-03-01"
+         },
+         "context": null
++    },
++    {
++        "action": "analyze_comment",
++        "outcome": "positive",
++        "values": {
++            "truth": 1.0,
++            "benevolence": 1.0,
++            "tolerance": 1.0
++        },
++        "api_response": {
++            "documents": [
++                {
++                    "id": "1",
++                    "sentiment": "positive",
++                    "confidenceScores": {
++                        "positive": 1.0,
++                        "neutral": 0.0,
++                        "negative": 0.0
++                    },
++                    "sentences": [
++                        {
++                            "sentiment": "positive",
++                            "confidenceScores": {
++                                "positive": 1.0,
++                                "neutral": 0.0,
++                                "negative": 0.0
++                            },
++                            "offset": 0,
++                            "length": 14,
++                            "text": "this is great!"
++                        }
++                    ],
++                    "warnings": []
++                }
++            ],
++            "errors": [],
++            "modelVersion": "2024-03-01"
++        },
++        "context": null
+     }
+ ]
+\ No newline at end of file
+diff --git a/memory.json b/memory.json
+index 01d0897..74b145f 100644
+--- a/memory.json
++++ b/memory.json
+@@ -1 +1 @@
+-[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
++[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
+
+2024-11-02 06:51:45,797 - Reason for changes: Automated code modification
+2024-11-02 06:51:46,151 - API Response: {'documents': [{'id': '1', 'sentiment': 'negative', 'confidenceScores': {'positive': 0.0, 'neutral': 0.0, 'negative': 1.0}, 'sentences': [{'sentiment': 'negative', 'confidenceScores': {'positive': 0.0, 'neutral': 0.0, 'negative': 1.0}, 'offset': 0, 'length': 8, 'text': 'not good'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+2024-11-02 06:51:48,506 - Committed changes:
+diff --git a/decision_log.json b/decision_log.json
+index 4c0b594..ba1d2f6 100644
+--- a/decision_log.json
++++ b/decision_log.json
+@@ -5885,5 +5885,44 @@
+             "modelVersion": "2024-03-01"
+         },
+         "context": null
++    },
++    {
++        "action": "analyze_comment",
++        "outcome": "positive",
++        "values": {
++            "truth": 1.0,
++            "benevolence": 1.0,
++            "tolerance": 1.0
++        },
++        "api_response": {
++            "documents": [
++                {
++                    "id": "1",
++                    "sentiment": "negative",
++                    "confidenceScores": {
++                        "positive": 0.0,
++                        "neutral": 0.0,
++                        "negative": 1.0
++                    },
++                    "sentences": [
++                        {
++                            "sentiment": "negative",
++                            "confidenceScores": {
++                                "positive": 0.0,
++                                "neutral": 0.0,
++                                "negative": 1.0
++                            },
++                            "offset": 0,
++                            "length": 8,
++                            "text": "not good"
++                        }
++                    ],
++                    "warnings": []
++                }
++            ],
++            "errors": [],
++            "modelVersion": "2024-03-01"
++        },
++        "context": null
+     }
+ ]
+\ No newline at end of file
+diff --git a/memory.json b/memory.json
+index 74b145f..c36cb29 100644
+--- a/memory.json
++++ b/memory.json
+@@ -1 +1 @@
+-[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
++[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
+
+2024-11-02 06:51:48,506 - Reason for changes: Automated code modification
+2024-11-02 06:51:48,829 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.03, 'neutral': 0.96, 'negative': 0.0}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.03, 'neutral': 0.96, 'negative': 0.0}, 'offset': 0, 'length': 7, 'text': 'ciao...'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
+2024-11-02 06:51:51,172 - Committed changes:
+diff --git a/decision_log.json b/decision_log.json
+index ba1d2f6..b88b161 100644
+--- a/decision_log.json
++++ b/decision_log.json
+@@ -5924,5 +5924,44 @@
+             "modelVersion": "2024-03-01"
+         },
+         "context": null
++    },
++    {
++        "action": "analyze_comment",
++        "outcome": "positive",
++        "values": {
++            "truth": 1.0,
++            "benevolence": 1.0,
++            "tolerance": 1.0
++        },
++        "api_response": {
++            "documents": [
++                {
++                    "id": "1",
++                    "sentiment": "neutral",
++                    "confidenceScores": {
++                        "positive": 0.03,
++                        "neutral": 0.96,
++                        "negative": 0.0
++                    },
++                    "sentences": [
++                        {
++                            "sentiment": "neutral",
++                            "confidenceScores": {
++                                "positive": 0.03,
++                                "neutral": 0.96,
++                                "negative": 0.0
++                            },
++                            "offset": 0,
++                            "length": 7,
++                            "text": "ciao..."
++                        }
++                    ],
++                    "warnings": []
++                }
++            ],
++            "errors": [],
++            "modelVersion": "2024-03-01"
++        },
++        "context": null
+     }
+ ]
+\ No newline at end of file
+diff --git a/memory.json b/memory.json
+index c36cb29..d38230f 100644
+--- a/memory.json
++++ b/memory.json
+@@ -1 +1 @@
+-[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
++[["be_benevolent", "positive"], ["be_benevolent", "negative"], ["tell_truth", "positive"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "negative"], ["analyze_comment", "positive"], ["tell_truth", "positive"], ["be_tolerant", "negative"], ["be_benevolent", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_benevolent", "negative"], ["be_benevolent", "positive"], ["tell_truth", "positive"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["analyze_comment", "positive"], ["be_tolerant", "negative"], ["tell_truth", "positive"], ["be_tolerant", "positive"], ["tell_truth", "negative"], ["be_benevolent", "negative"], ["analyze_comment", "positive"], ["be_benevolent", "positive"], ["be_tolerant", "negative"], ["analyze_comment", "positive"], ["tell_truth", "negative"], ["be_tolerant", "positive"], ["tell_truth", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"], ["analyze_comment", "positive"]]
+\ No newline at end of file
+
+2024-11-02 06:51:51,173 - Reason for changes: Automated code modification
+2024-11-02 06:52:54,218 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '60642673-9919-11ef-abf5-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+No body was attached to the request
+2024-11-02 06:52:54,674 - Response status: 401
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Length': '97'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'WWW-Authenticate': 'Bearer authorization="https://login.microsoftonline.com/91334908-cce5-4150-a4c3-bb766a92451a", resource="https://vault.azure.net"'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': '60642673-9919-11ef-abf5-005056c00008'
+    'x-ms-request-id': '75f70cd3-81f8-4d9f-89d8-cf160cb1ac56'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 12:52:53 GMT'
+2024-11-02 06:52:56,017 - AzureCliCredential.get_token_info succeeded
+2024-11-02 06:52:56,017 - Request URL: 'https://VerityAIVault.vault.azure.net/secrets/AZURE-CLIENT-ID/?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '60642673-9919-11ef-abf5-005056c00008'
+    'User-Agent': 'azsdk-python-keyvault-secrets/4.9.0 Python/3.12.6 (Windows-11-10.0.26120-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2024-11-02 06:52:56,116 - Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Pragma': 'no-cache'
+    'Content-Type': 'application/json; charset=utf-8'
+    'Expires': '-1'
+    'x-ms-keyvault-region': 'westus'
+    'x-ms-client-request-id': '60642673-9919-11ef-abf5-005056c00008'
+    'x-ms-request-id': '9c5ee382-5dd6-4f2e-ae65-78be185e6f6c'
+    'x-ms-keyvault-service-version': '1.9.1864.1'
+    'x-ms-keyvault-network-info': 'conn_type=Ipv4;addr=35.146.132.8;act_addr_fam=InterNetwork;'
+    'x-ms-keyvault-rbac-assignment-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'Date': 'Sat, 02 Nov 2024 12:52:55 GMT'
+    'Content-Length': '341'
+2024-11-02 06:52:56,116 - Successfully retrieved API key from Key Vault.
+2024-11-02 06:54:05,650 - API Response: {'documents': [{'id': '1', 'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'sentences': [{'sentiment': 'neutral', 'confidenceScores': {'positive': 0.11, 'neutral': 0.89, 'negative': 0.0}, 'offset': 0, 'length': 5, 'text': 'hello'}], 'warnings': []}], 'errors': [], 'modelVersion': '2024-03-01'}
