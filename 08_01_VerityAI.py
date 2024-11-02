@@ -5,9 +5,7 @@ import random
 import requests
 import subprocess
 import warnings
-import sys
-import contextlib
-
+import time
 from azure.identity import AzureCliCredential
 from azure.keyvault.secrets import SecretClient
 from ai_decision import decide_action
@@ -15,11 +13,14 @@ from feedback import evaluate_feedback
 from log_utils import log_decision
 from self_modify import modify_action_logic, commit_and_push_changes
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
 # Capture and log warnings
 def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
     logger.warning(f"Warning: {message} (category: {category.__name__}, filename: {filename}, line: {lineno})")
 
-# Attach the warning function to display warnings
 warnings.showwarning = warn_on_warnings
 
 # Core Values
@@ -43,10 +44,6 @@ action_weights = {
     'be_tolerant': 1.0,
     'analyze_comment': 1.0,
 }
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)  # Set to INFO to see warnings
-logger = logging.getLogger()
 
 # Set up Azure Key Vault to fetch API key
 key_vault_name = "VerityAIVault"
@@ -90,9 +87,9 @@ def self_evaluate(action_success_rates, action_weights):
     commit_and_push_changes()
 
 # Autonomous Loop with Comment Analysis
-# Autonomous Loop with Comment Analysis
 def autonomous_loop():
     """The main loop where AI makes decisions, analyzes comments, and adjusts based on outcomes."""
+    analyzed_comments = set()  # Track analyzed comments to avoid duplicates
     while True:  # Run continuously
         info = search_information("latest trends in AI")
         print("Retrieved Information:", info)
@@ -101,9 +98,13 @@ def autonomous_loop():
         print(f"AI decided to: {action}")
 
         if action == "analyze_comment":
-            comments_to_analyze = ["hello", "how are you?", "this is great!", "not good", "ciao..."]
-            for comment_text in comments_to_analyze:
+            new_comments = ["hello", "how are you?", "this is great!", "not good", "ciao..."]  # Replace this with dynamic comment retrieval
+            for comment_text in new_comments:
+                if comment_text in analyzed_comments:
+                    continue  # Skip already analyzed comments
+
                 print(f"Analyzing comment: {comment_text}")
+                analyzed_comments.add(comment_text)
 
                 analyze_request = {
                     "documents": [
@@ -143,6 +144,8 @@ def autonomous_loop():
 
                 with open(memory_file, "w") as file:
                     json.dump(memory, file)
+
+        time.sleep(60)  # Optional: Pause for 60 seconds before the next iteration
 
 # Run the autonomous loop
 if __name__ == "__main__":
