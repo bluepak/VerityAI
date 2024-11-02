@@ -9785,5 +9785,44 @@
             "modelVersion": "2024-03-01"
         },
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 1.0,
+            "tolerance": 1.0
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "positive",
+                    "confidenceScores": {
+                        "positive": 1.0,
+                        "neutral": 0.0,
+                        "negative": 0.0
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "positive",
+                            "confidenceScores": {
+                                "positive": 1.0,
+                                "neutral": 0.0,
+                                "negative": 0.0
+                            },
+                            "offset": 0,
+                            "length": 14,
+                            "text": "this is great!"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
