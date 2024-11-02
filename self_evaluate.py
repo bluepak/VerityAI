@@ -4,6 +4,7 @@
 import logging
 from self_modify import modify_action_logic
 from log_utils import analyze_failures
+from self_modify import modify_action_logic, commit_and_push_changes
 
 logger = logging.getLogger()
 
@@ -24,3 +25,9 @@ def self_evaluate(action_success_rates, action_weights):
         if count > 3:  # Arbitrary threshold for frequent failures
             logger.info(f"Frequent failure detected for {action}. Considering further modification.")
             modify_action_logic(action, action_weights)
+
+    # Existing logic for evaluating actions...
+    # Call modify_action_logic() when needed
+
+    # After modifications
+    commit_and_push_changes()
