@@ -88,6 +88,22 @@ else:
 # Initialize logging
 logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
+def generate_dynamic_query(keywords):
+    """Generate a dynamic and unique search query each time."""
+    # Common AI-related phrases for variation
+    additional_phrases = ["latest insights", "trending", "developments in", "future of"]
+    
+    # Create base query
+    query = " ".join(keywords)
+    
+    # Randomly add a phrase for variety
+    query = f"{random.choice(additional_phrases)} {query}"
+    
+    # Shuffle the keywords slightly for variation
+    keyword_list = query.split()
+    random.shuffle(keyword_list)
+    
+    return " ".join(keyword_list)
 
 
 def detect_patterns(text_data):
@@ -130,13 +146,29 @@ sample_text = "hello how are you this is great not good hello AI is amazing AI t
 keywords = detect_patterns(sample_text)
 print("Extracted Keywords:", keywords)
 
+import requests
 
 def search_information(keywords):
-    """Search for information on the web using extracted keywords."""
-    query = " ".join(keywords)  # Join keywords into a search query
-    url = f"https://api.duckduckgo.com/?q={query}&format=json"
-    response = requests.get(url)
-    return response.json()
+    """Search for information on the web using extracted keywords with error handling."""
+    query = generate_dynamic_query(keywords)  # Create a search query from the keywords
+    url = f"https://api.duckduckgo.com/?q={query}&format=json"  # Replace with actual API if needed
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+
+        print("Search Query:", query)  # Log the dynamic search query
+        
+        # Attempt to parse the JSON response
+        try:
+            return response.json()
+        except ValueError:
+            print("Error: Response is not in JSON format or is empty.")
+            return {}  # Return an empty dictionary if JSON parsing fails
+
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+        return {}  # Return an empty dictionary on request failure
 
 
 
@@ -213,6 +245,17 @@ def detect_patterns(text_data):
     return list(keywords.keys())  # Return a list of keywords
 
 
+def get_recent_data():
+    """Fetches recent data for pattern detection, such as logs or comments."""
+    # Replace with the actual source of data (e.g., reading from a log file)
+    try:
+        with open("recent_data.txt", "r") as file:  # Example file with recent interactions
+            data = file.read()
+    except FileNotFoundError:
+        data = "No recent data available."
+
+    return data
+
 
 import datetime  # Make sure this is imported at the top of your script
 
@@ -226,12 +269,11 @@ def autonomous_loop():
         print(f"{timestamp} - Starting loop #{loop_counter}")
 
 
-        # Extract patterns from comments or logs to generate search keywords
-        comments = "hello how are you this is great not good ciao..."  # Example comments
-        keywords = detect_patterns(comments)
-        
+        # Replace sample_text with real data input (e.g., from logs or live comments)
+        recent_data = get_recent_data()  # Function to fetch updated comments or logs
+        keywords = detect_patterns(recent_data)
+
         if keywords:
-            # Perform a dynamic search with detected keywords
             info = search_information(keywords)
             print("Retrieved Information:", info)
         
@@ -287,6 +329,18 @@ def autonomous_loop():
 
                 with open(memory_file, "w") as file:
                     json.dump(memory, file)
+
+
+        # Sample comments for testing
+        comments = "hello how are you this is great not good hello AI trends future AI hello"
+        
+        # Extract keywords from comments
+        keywords = detect_patterns(comments)
+        
+        # Perform a dynamic search using the extracted keywords
+        if keywords:
+            info = search_information(keywords)
+            print("Retrieved Information:", info)
 
         loop_counter += 1  # Increment the loop counter
         time.sleep(7)  # Optional: Pause for 60 seconds before the next iteration
