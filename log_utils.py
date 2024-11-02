@@ -4,6 +4,24 @@
 import json
 import os
 
+
+
+# File:  log_utils.py
+
+import logging
+from datetime import datetime
+
+# Initialize logging
+logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+def log_change(description, module):
+    """Logs code changes with a description and module affected."""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    logging.info(f"Change: {description} | Module: {module} | Time: {timestamp}")
+
+
+
+
 def log_decision(action, outcome, values, api_response=None, context=None):
     log_entry = {
         "action": action,

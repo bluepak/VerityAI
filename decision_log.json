@@ -5183,5 +5183,44 @@
             "modelVersion": "2024-03-01"
         },
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 1.0,
+            "tolerance": 1.0
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "neutral",
+                    "confidenceScores": {
+                        "positive": 0.11,
+                        "neutral": 0.89,
+                        "negative": 0.0
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "neutral",
+                            "confidenceScores": {
+                                "positive": 0.11,
+                                "neutral": 0.89,
+                                "negative": 0.0
+                            },
+                            "offset": 0,
+                            "length": 5,
+                            "text": "hello"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]

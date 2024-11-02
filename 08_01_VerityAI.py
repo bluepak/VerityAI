@@ -6,19 +6,16 @@ import requests
 import subprocess
 import warnings
 import time
-import datetime  # Add this import at the top of your script
-
-import subprocess
-import logging
+from datetime import datetime
 
 from azure.identity import AzureCliCredential
 from azure.keyvault.secrets import SecretClient
 from ai_decision import decide_action
 from feedback import evaluate_feedback
-from log_utils import log_decision
+from log_utils import log_change, log_decision
 from self_modify import modify_action_logic, commit_and_push_changes
 
-# Configure logging
+# Configure logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -27,6 +24,7 @@ def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
     logger.warning(f"Warning: {message} (category: {category.__name__}, filename: {filename}, line: {lineno})")
 
 warnings.showwarning = warn_on_warnings
+
 
 # Core Values
 VALUES = {
@@ -76,6 +74,16 @@ if os.path.exists(memory_file):
         memory = json.load(file)
 else:
     memory = []
+
+
+
+# Initialize logging
+logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+def log_change(description, module):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    logging.info(f"Change: {description} | Module: {module} | Time: {timestamp}")
+
 
 def search_information(query):
     """Search for information on the web using DuckDuckGo."""
