@@ -8,6 +8,9 @@ import warnings
 import time
 import datetime  # Add this import at the top of your script
 
+import subprocess
+import logging
+
 from azure.identity import AzureCliCredential
 from azure.keyvault.secrets import SecretClient
 from ai_decision import decide_action
@@ -79,11 +82,58 @@ def search_information(query):
     url = f"https://api.duckduckgo.com/?q={query}&format=json"
     response = requests.get(url)
     return response.json()
-
 def commit_and_push_changes():
-    subprocess.run(["git", "add", "."])
-    subprocess.run(["git", "commit", "-m", "Automated code modification"])
-    subprocess.run(["git", "push"])
+    # Get the list of changes to be committed
+    result = subprocess.run(["git", "diff", "--cached"], capture_output=True, text=True)
+    changes = result.stdout.strip()
+    
+    if changes:
+        # Commit the changes
+        subprocess.run(["git", "add", "."])
+        subprocess.run(["git", "commit", "-m", "Automated code modification"])
+        subprocess.run(["git", "push"])
+
+        # Display the changes in the output
+        print("--------------------")
+        print("Updating my code to:")
+        print(changes)  # Display the code changes
+        print("Because: Automated code modification")
+        print("--------------------")
+    else:
+        print("No changes to commit.")
+
+def infer_reason(changes):
+    if "added" in changes or "new" in changes:
+        return "Adding new features."
+    elif "removed" in changes or "deleted" in changes:
+        return "Removing unnecessary code."
+    elif "fix" in changes or "error" in changes:
+        return "Fixing identified issues."
+    else:
+        return "General code modifications."
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+def commit_and_push_changes(reason="Automated code modification"):
+    # Get the diff of the changes
+    diff = subprocess.run(["git", "diff"], capture_output=True, text=True)
+    
+    # If there are changes, proceed to commit
+    if diff.stdout:
+        subprocess.run(["git", "add", "."])
+        subprocess.run(["git", "commit", "-m", reason])
+        subprocess.run(["git", "push"])
+
+        # Log the changes
+        logger.info("Committed changes:\n%s", diff.stdout)
+        logger.info("Reason for changes: %s", reason)
+    else:
+        logger.info("No changes to commit.")
+
+
 
 def self_evaluate(action_success_rates, action_weights):
     commit_and_push_changes()
@@ -153,7 +203,7 @@ def autonomous_loop():
                     json.dump(memory, file)
 
         loop_counter += 1  # Increment the loop counter
-        time.sleep(60)  # Optional: Pause for 60 seconds before the next iteration
+        time.sleep(17)  # Optional: Pause for 60 seconds before the next iteration
 
 # Run the autonomous loop
 if __name__ == "__main__":
