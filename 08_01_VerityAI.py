@@ -90,18 +90,28 @@ logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format=
 
 def generate_dynamic_query(keywords):
     """Generate a dynamic and unique search query each time."""
+    import random
+
     # Common AI-related phrases for variation
     additional_phrases = ["latest insights", "trending", "developments in", "future of"]
-    
-    # Create base query
-    query = " ".join(keywords)
-    
-    # Randomly add a phrase for variety
-    query = f"{random.choice(additional_phrases)} {query}"
-    
-    # Shuffle the keywords slightly for variation
-    keyword_list = query.split()
+    # Filter out any single characters or empty strings to prevent fragmentation
+    cleaned_keywords = [keyword.strip() for keyword in keywords if len(keyword.strip()) > 1]
+
+    # Join cleaned keywords into a base query
+    base_query = " ".join(cleaned_keywords)
+
+    # Add a random phrase for variety
+    query_with_phrase = f"{random.choice(additional_phrases)} {base_query}"
+
+    # Split the query into words, shuffle, and reassemble to maintain readability
+    keyword_list = query_with_phrase.split()
     random.shuffle(keyword_list)
+    
+    # Join the shuffled list into a single query string
+    final_query = " ".join(keyword_list)
+    
+    # Log to verify the output structure
+    print("Generated Search Query:", final_query)
     
     return " ".join(keyword_list)
 
