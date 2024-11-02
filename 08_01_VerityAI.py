@@ -22,6 +22,15 @@ from update_module import comment_analysis
 from collections import Counter
 
 
+
+# Configure logging
+logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Example logging
+logging.info('Log file created for VerityAI')
+logging.error('An error occurred')  # Example error logging
+
+
 # Configure logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -211,9 +220,6 @@ def log_change(description, module):
 # Sample data for testing pattern detection
 sample_text = "hello how are you this is great not good hello AI is amazing AI trends future AI hello"
 
-# Run the detect_patterns function to extract keywords
-keywords = detect_patterns(sample_text)
-print("Extracted Keywords:", keywords)
 
 import requests
 
