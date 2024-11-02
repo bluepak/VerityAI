@@ -462,5 +462,44 @@
         },
         "api_response": null,
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 1.0,
+            "tolerance": 1.0
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "neutral",
+                    "confidenceScores": {
+                        "positive": 0.24,
+                        "neutral": 0.75,
+                        "negative": 0.01
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "neutral",
+                            "confidenceScores": {
+                                "positive": 0.24,
+                                "neutral": 0.75,
+                                "negative": 0.01
+                            },
+                            "offset": 0,
+                            "length": 7,
+                            "text": "h o l a"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
