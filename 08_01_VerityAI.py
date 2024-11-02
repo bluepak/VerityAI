@@ -6,6 +6,7 @@ import requests
 import subprocess
 import warnings
 import time
+import re
 from datetime import datetime
 
 from azure.identity import AzureCliCredential
@@ -15,6 +16,7 @@ from feedback import evaluate_feedback
 from log_utils import log_change, log_decision
 from self_modify import modify_action_logic, commit_and_push_changes
 from update_module import comment_analysis
+from collections import Counter
 
 
 # Configure logger
@@ -149,6 +151,21 @@ def self_evaluate(action_success_rates, action_weights):
     commit_and_push_changes()
 
 # Autonomous Loop with Comment Analysis
+
+def detect_patterns(text_data):
+    """Identify recurring keywords or topics from provided text data."""
+    # Convert text to lowercase and remove non-alphanumeric characters
+    cleaned_text = re.sub(r'[^a-zA-Z\s]', '', text_data.lower())
+    words = cleaned_text.split()
+
+    # Count word occurrences
+    common_words = Counter(words)
+
+    # Filter out common stop words and select frequent keywords
+    stop_words = {"the", "is", "and", "in", "to", "of", "a", "for"}  # Add more as needed
+    keywords = {word: count for word, count in common_words.items() if word not in stop_words and count > 1}
+
+    return keywords
 
 import datetime  # Make sure this is imported at the top of your script
 
