@@ -860,5 +860,16 @@
             "modelVersion": "2024-03-01"
         },
         "context": null
+    },
+    {
+        "action": "tell_truth",
+        "outcome": "negative",
+        "values": {
+            "truth": 0.8,
+            "benevolence": 1,
+            "tolerance": 0.9
+        },
+        "api_response": null,
+        "context": null
     }
 ]
