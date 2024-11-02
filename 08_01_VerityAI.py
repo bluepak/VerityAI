@@ -1,21 +1,4 @@
 import logging
-
-
-
-
-# Simplified logging configuration
-logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.debug("Testing log file creation within 08_01_VerityAI.py")
-
-
-# Example logging
-logging.info('Log file created for VerityAI')
-logging.error('An error occurred')  # Example error logging
-
-
-# Configure logger
-logger = logging.getLogger()
-
 import json
 import os
 import random
@@ -39,13 +22,9 @@ from update_module import comment_analysis
 from collections import Counter
 
 
-
-
-
-# Step 1: Define Keywords and Patterns to Track
-keywords = ["error", "improve", "optimize", "performance", "debug"]
-log_file = "verityai_log.log"  # Replace with the path to your log file
-
+# Configure logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 # Capture and log warnings
 def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
@@ -105,113 +84,24 @@ else:
     memory = []
 
 
+
 # Initialize logging
 logging.basicConfig(filename='verityai_changes.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
-
-
-# Step 2: Set Up the Log Scanning Function
-def scan_logs_and_generate_query(log_file):
-    queries = []  # Store generated queries
-
-    with open(log_file, 'r') as file:
-        for line in file:
-            for keyword in keywords:
-                if re.search(rf'\b{keyword}\b', line, re.IGNORECASE):  # Case-insensitive keyword matching
-                    # Step 3: Generate a Query Based on Detected Patterns
-                    context = line.strip()  # You can add more context if needed
-                    query = f"AI {keyword} code {context}"
-                    queries.append(query)
-
-    return queries
-
-# Run the function and print generated queries
-generated_queries = scan_logs_and_generate_query(log_file)
-print("Generated Queries:")
-for query in generated_queries:
-    print(query)
-
-
-def analyze_logs(log_file_path):
-    """
-    Analyze VerityAI's logs to detect recurring patterns, errors, or issues.
-    
-    Parameters:
-        log_file_path (str): Path to the log file.
-
-    Returns:
-        dict: A dictionary of flagged issues with their counts.
-    """
-    # Keywords to track for pattern recognition
-    error_keywords = [
-        "memory error", "connection timeout", "failed to load", 
-        "authentication failed", "syntax error", "index out of range",
-        "null pointer", "memory leak", "disk full", "timeout"
-    ]
-    
-    # Load log file
-    with open(log_file_path, 'r') as file:
-        log_content = file.read().lower()
-
-    # Count occurrences of each keyword
-    pattern_counter = Counter()
-    for keyword in error_keywords:
-        occurrences = len(re.findall(rf'\b{keyword}\b', log_content))
-        if occurrences > 0:
-            pattern_counter[keyword] += occurrences
-
-    # Filter patterns by a threshold (e.g., occurrences > 3)
-    flagged_issues = {pattern: count for pattern, count in pattern_counter.items() if count >= 3}
-    
-    # Output flagged issues for query generation
-    if flagged_issues:
-        print("Flagged Issues:", flagged_issues)
-    else:
-        print("No significant recurring issues detected.")
-
-    return flagged_issues
-
-
-
-
 def generate_dynamic_query(keywords):
     """Generate a dynamic and unique search query each time."""
-    import random
-
     # Common AI-related phrases for variation
+    additional_phrases = ["latest insights", "trending", "developments in", "future of"]
     
-    # Focused phrases for self-improvement and comprehension
-    improvement_phrases = [ "FULLY AUTONOMOUS AI", "AI THAT improves their own code"
-        "optimize code structure",
-        "advanced error handling techniques",
-        "modular design principles",
-        "dynamic search generation in AI",
-        "self-modifying code examples",
-        "enhancing memory management",
-        "iterative improvement in AI",
-        "effective logging and debugging methods",
-        "pattern recognition in code logic",
-        "optimizing autonomous decision-making"
-    ]
-
-    # Filter out any single characters or empty strings to prevent fragmentation
-    cleaned_keywords = [keyword.strip() for keyword in keywords if len(keyword.strip()) > 1]
-
-    # Join cleaned keywords into a base query
-    base_query = " ".join(cleaned_keywords)
-
-    # Add a random phrase for variety
-    query_with_focus = f"{random.choice(improvement_phrases)} {base_query}"
-
-    # Split the query into words, shuffle, and reassemble to maintain readability
-    keyword_list = query_with_focus.split()
+    # Create base query
+    query = " ".join(keywords)
+    
+    # Randomly add a phrase for variety
+    query = f"{random.choice(additional_phrases)} {query}"
+    
+    # Shuffle the keywords slightly for variation
+    keyword_list = query.split()
     random.shuffle(keyword_list)
-    
-    # Join the shuffled list into a single query string
-    final_query = " ".join(keyword_list)
-    
-    # Log to verify the output structure
-    print("Generated Search Query:", final_query)
     
     return " ".join(keyword_list)
 
@@ -252,6 +142,9 @@ def log_change(description, module):
 # Sample data for testing pattern detection
 sample_text = "hello how are you this is great not good hello AI is amazing AI trends future AI hello"
 
+# Run the detect_patterns function to extract keywords
+keywords = detect_patterns(sample_text)
+print("Extracted Keywords:", keywords)
 
 import requests
 
