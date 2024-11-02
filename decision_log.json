@@ -230,5 +230,44 @@
         },
         "api_response": null,
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 0.9,
+            "benevolence": 0.6000000000000001,
+            "tolerance": 0.9
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "neutral",
+                    "confidenceScores": {
+                        "positive": 0.24,
+                        "neutral": 0.75,
+                        "negative": 0.01
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "neutral",
+                            "confidenceScores": {
+                                "positive": 0.24,
+                                "neutral": 0.75,
+                                "negative": 0.01
+                            },
+                            "offset": 0,
+                            "length": 7,
+                            "text": "h o l a"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
