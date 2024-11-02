@@ -48,5 +48,16 @@
             "tolerance": 1.0
         },
         "api_response": null
+    },
+    {
+        "action": "be_benevolent",
+        "outcome": "negative",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 0.9,
+            "tolerance": 1.0
+        },
+        "api_response": null,
+        "context": null
     }
 ]

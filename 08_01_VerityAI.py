@@ -1,23 +1,26 @@
-
-# File: main.py
 import logging
 import json
 import os
-import requests
 import random
+import requests
+import subprocess
+import warnings
+import sys
+import contextlib
+
+from azure.identity import AzureCliCredential
+from azure.keyvault.secrets import SecretClient
 from ai_decision import decide_action
 from feedback import evaluate_feedback
 from log_utils import log_decision
-from self_evaluate import self_evaluate
+from self_modify import modify_action_logic, commit_and_push_changes
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
+# Capture and log warnings
+def warn_on_warnings(message, category, filename, lineno, file=None, line=None):
+    logger.warning(f"Warning: {message} (category: {category.__name__}, filename: {filename}, line: {lineno})")
 
-# Set up Azure Text Analytics API key and endpoint
-api_key = "8NwkoB1QllB0RD2G9qW9hE6So3KGFdBQXCPoD10JIPF39t8W4IAlJQQJ99AJAC4f1cMXJ3w3AAAaACOGafwY"  # Replace with your actual API key
-endpoint = "https://verityai.cognitiveservices.azure.com"  # Replace with your actual endpoint
-url = f"{endpoint}/text/analytics/v3.0/sentiment"
+# Attach the warning function to display warnings
+warnings.showwarning = warn_on_warnings
 
 # Core Values
 VALUES = {
@@ -33,13 +36,36 @@ action_success_rates = {
     "be_tolerant": {"positive": 0, "total": 0}
 }
 
-# Weights for each action
+# Define action_weights
 action_weights = {
-    "tell_truth": 1.0,
-    "be_benevolent": 1.0,
-    "be_tolerant": 1.0,
-    "analyze_comment": 1.0
+    'tell_truth': 1.0,
+    'be_benevolent': 1.0,
+    'be_tolerant': 1.0,
+    'analyze_comment': 1.0,
 }
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)  # Set to INFO to see warnings
+logger = logging.getLogger()
+
+# Set up Azure Key Vault to fetch API key
+key_vault_name = "VerityAIVault"
+key_vault_uri = f"https://{key_vault_name}.vault.azure.net/"
+credential = AzureCliCredential()
+client = SecretClient(vault_url=key_vault_uri, credential=credential)
+
+# Fetch API key from Azure Key Vault
+secret_name = "AZURE-CLIENT-ID"
+try:
+    api_key = client.get_secret(secret_name).value
+    logger.info("Successfully retrieved API key from Key Vault.")
+except Exception as e:
+    logger.error(f"Failed to retrieve API key: {e}")
+    raise
+
+# Set up Azure Text Analytics endpoint
+endpoint = "https://verityai.cognitiveservices.azure.com"
+url = f"{endpoint}/text/analytics/v3.0/sentiment"
 
 # Load memory from a JSON file if it exists
 memory_file = "memory.json"
@@ -49,23 +75,33 @@ if os.path.exists(memory_file):
 else:
     memory = []
 
+def search_information(query):
+    """Search for information on the web using DuckDuckGo."""
+    url = f"https://api.duckduckgo.com/?q={query}&format=json"
+    response = requests.get(url)
+    return response.json()
+
+def commit_and_push_changes():
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "Automated code modification"])
+    subprocess.run(["git", "push"])
+
+def self_evaluate(action_success_rates, action_weights):
+    commit_and_push_changes()
+
 # Autonomous Loop with Comment Analysis
 def autonomous_loop():
     """The main loop where AI makes decisions, analyzes comments, and adjusts based on outcomes."""
-    for _ in range(5):
+    while True:  # Run continuously
+        info = search_information("latest trends in AI")
+        print("Retrieved Information:", info)
+
         action = decide_action(action_weights)
         print(f"AI decided to: {action}")
-
-        context = {
-            "previous_values": VALUES.copy(),
-            "previous_action": memory[-1][0] if memory else None,
-            "previous_outcome": memory[-1][1] if memory else None
-        }
 
         if action == "analyze_comment":
             comment_text = input("Enter the comment text to analyze: ")
 
-            # Prepare the request body
             analyze_request = {
                 "documents": [
                     {
@@ -81,7 +117,6 @@ def autonomous_loop():
                 "Content-Type": "application/json"
             }
 
-            # Make the API request
             try:
                 response = requests.post(url, headers=headers, json=analyze_request)
                 response.raise_for_status()
@@ -100,17 +135,15 @@ def autonomous_loop():
         memory.append((action, outcome))
         evaluate_feedback(action, outcome, VALUES, action_success_rates)
 
-        # Log the decision and result to the JSON file
-        log_decision(action, outcome, VALUES.copy(), api_response=result, context=context)
+        log_decision(action, outcome, VALUES.copy(), api_response=result)
 
         print(f"Current Values: {VALUES}\n")
 
-    # Self-evaluate after completing actions
-    self_evaluate(action_success_rates, action_weights)
+        self_evaluate(action_success_rates, action_weights)
 
-    # Save memory to a JSON file
-    with open(memory_file, "w") as file:
-        json.dump(memory, file)
+        with open(memory_file, "w") as file:
+            json.dump(memory, file)
 
 # Run the autonomous loop
-autonomous_loop()
+if __name__ == "__main__":
+    autonomous_loop()
