@@ -4247,5 +4247,44 @@
             "modelVersion": "2024-03-01"
         },
         "context": null
+    },
+    {
+        "action": "analyze_comment",
+        "outcome": "positive",
+        "values": {
+            "truth": 1.0,
+            "benevolence": 1.0,
+            "tolerance": 1.0
+        },
+        "api_response": {
+            "documents": [
+                {
+                    "id": "1",
+                    "sentiment": "neutral",
+                    "confidenceScores": {
+                        "positive": 0.04,
+                        "neutral": 0.95,
+                        "negative": 0.01
+                    },
+                    "sentences": [
+                        {
+                            "sentiment": "neutral",
+                            "confidenceScores": {
+                                "positive": 0.04,
+                                "neutral": 0.95,
+                                "negative": 0.01
+                            },
+                            "offset": 0,
+                            "length": 12,
+                            "text": "how are you?"
+                        }
+                    ],
+                    "warnings": []
+                }
+            ],
+            "errors": [],
+            "modelVersion": "2024-03-01"
+        },
+        "context": null
     }
 ]
