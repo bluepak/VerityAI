@@ -799,5 +799,16 @@
             "modelVersion": "2024-03-01"
         },
         "context": null
+    },
+    {
+        "action": "be_benevolent",
+        "outcome": "positive",
+        "values": {
+            "truth": 0.9,
+            "benevolence": 1,
+            "tolerance": 1
+        },
+        "api_response": null,
+        "context": null
     }
 ]
