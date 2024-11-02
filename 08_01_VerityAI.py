@@ -23,9 +23,12 @@ from collections import Counter
 
 
 
-# Configure logging
+import logging
+
+# Simplified logging configuration
 logging.basicConfig(filename='verityai_log.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.debug("Testing log file creation for verityai_log.log")
+logging.debug("Testing log file creation within 08_01_VerityAI.py")
+
 
 
 # Example logging
